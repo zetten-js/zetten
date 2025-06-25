@@ -1,0 +1,34 @@
+{
+  "name": "zetten-js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fast-glob": "^3.3.3",
+    "node-cron": "^4.1.1",
+    "zod": "^3.25.67"
+  },
+  "peerDependencies": {
+    "bullmq": "^5.0.0",
+    "fastify": "^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "bullmq": {
+      "optional": true
+    },
+    "fastify": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.1",
+    "bullmq": "^5.56.0",
+    "fastify": "^5.4.0"
+  }
+}
