@@ -14,7 +14,7 @@ const defaultPatterns = HTTP_METHODS.map((method) => `**/${method}.handler.${def
 
 export class HandlerPlugin implements Plugin {
   private handlers: Array<Handler & { path: string, method: typeof HTTP_METHODS[number] }> = [];
-  constructor(private baseDir: string, private logger: Logger = console) { }
+  constructor(private baseDir: string = "./routes", private logger: Logger = console) { }
   
   async init(zetten: Zetten): Promise<void> {
     await this.readFrom(this.baseDir, ...defaultPatterns);

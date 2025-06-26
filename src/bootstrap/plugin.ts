@@ -11,7 +11,7 @@ const defaultPatterns = [`**/*.bootstrap.${defaultExt}`, `**/*.boot.${defaultExt
 
 export class BootstrapPlugin implements Plugin {
   private files: LoadedFile<Bootstrap>[] = [];
-  constructor(private baseDir: string, private logger: Logger = console) { }
+  constructor(private baseDir: string = "./bootstrap", private logger: Logger = console) { }
 
   init(): void {
     this.readFrom(this.baseDir, ...defaultPatterns);

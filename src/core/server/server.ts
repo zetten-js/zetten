@@ -1,3 +1,5 @@
+import { HandlerPlugin } from '@zetten/handler';
+
 import { Logger } from '../logger';
 import { Plugin } from '../plugin';
 import { IServerAdapter, ServerConfig } from './types';
@@ -10,10 +12,11 @@ export class Zetten {
   constructor(private config: ServerConfig) {
     this.serverAdapter = config.adapter;
     this.logger = config.logger || console;
+    this.plugins.push(new HandlerPlugin(config.routesDir, this.logger));
   }
 
-  public registerPlugin(manager: Plugin): this {
-    this.plugins.push(manager);
+  public registerPlugin(plugin: Plugin): this {
+    this.plugins.push(plugin);
     return this;
   }
 
@@ -29,12 +32,10 @@ export class Zetten {
   }
 
   private async initializePlugins(): Promise<void> {
-    for (const manager of this.plugins) {
-      if (manager) {
-        await manager.init(this);
+    for (const plugin of this.plugins) {
+      if (plugin) {
+        await plugin.init(this);
       }
     }
   }
-
-
 }

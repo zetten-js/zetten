@@ -1,14 +1,62 @@
 {
   "name": "zetten",
   "version": "0.0.1-alpha1",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc"
+  "description": "A minimalist file-based full-stack framework for Node.js, inspired by Next.js App Router. Supports routes, queues, cron jobs and boot scripts by convention.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./adapter/fastify": {
+      "import": "./dist/core/server/adapter/fastify/index.js",
+      "types": "./dist/core/server/adapter/fastify/index.d.ts"
+    },
+    "./adapter/bull": {
+      "import": "./dist/queue/adapter/bull/index.js",
+      "types": "./dist/queue/adapter/bull/index.d.ts"
+    },
+    "./cron": {
+      "import": "./dist/cron/index.js",
+      "types": "./dist/cron/index.d.ts"
+    },
+    "./bootstrap": {
+      "import": "./dist/bootstrap/index.js",
+      "types": "./dist/bootstrap/index.d.ts"
+    }
+    
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "framework",
+    "nodejs",
+    "fullstack",
+    "typescript",
+    "fastify",
+    "queue",
+    "cron",
+    "file-based",
+    "plugin",
+    "routing"
+  ],
+  "author": "Mayron Fernandes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zetten-js/zetten"
+  },
+  "bugs": {
+    "url": "https://github.com/zetten-js/zetten/issues"
+  },
+  "homepage": "https://github.com/zetten-js/zetten#readme",
   "dependencies": {
     "fast-glob": "^3.3.3",
     "node-cron": "^4.1.1",
@@ -29,6 +77,7 @@
   "devDependencies": {
     "@types/node": "^20.19.1",
     "bullmq": "^5.56.0",
+    "typescript": "^5.4.0",
     "fastify": "^5.4.0"
   }
 }

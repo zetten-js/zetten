@@ -7,9 +7,11 @@ export interface LoadedFile<T> {
   name: string;
   module: T;
 }
+
 export interface LoadedFileWithSkip<T> extends LoadedFile<T> {
   skip?: boolean;
 }
+
 export class Loader {
   static async load<T>(
     baseDir: string,

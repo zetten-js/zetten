@@ -11,4 +11,5 @@ export interface ServerConfig {
   port?: number;
   adapter: IServerAdapter;
   logger?: Logger;
+  routesDir?: string;
 }

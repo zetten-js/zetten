@@ -3,13 +3,13 @@ import { Queue as BullQueue, QueueEvents, QueueOptions as BullQueueOptions, Work
 import { Logger } from '@zetten/core/logger';
 import { defaultQueuePatterns, QueuePlugin } from '@zetten/queue/plugin';
 
-export class BullMQManager extends QueuePlugin {
+export class BullMQPlugin extends QueuePlugin {
   private queues: Map<string, BullQueue> = new Map();
   private workers: Map<string, Worker> = new Map();
   private events: Map<string, QueueEvents> = new Map();
 
   constructor(
-    baseDir: string,
+    baseDir: string = "./queue",
     private patterns: string[] = [defaultQueuePatterns],
     logger: Logger = console
   ) { super(baseDir, logger); }

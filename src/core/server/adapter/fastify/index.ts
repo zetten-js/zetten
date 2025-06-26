@@ -21,3 +21,5 @@ export class FastifyAdapter implements IServerAdapter {
     })
   }
 }
+
+export const fastifyAdapter = (fastify?: FastifyInstance) => new FastifyAdapter(fastify);
