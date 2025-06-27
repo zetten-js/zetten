@@ -78,10 +78,10 @@ Zetten will automatically scan and load files based on folder + filename convent
 
 | Plugin    | File Pattern      |
 | --------- | ----------------- |
-| Routes    | `**/*.handler.ts` |
-| Queue     | `**/*.worker.ts`  |
-| Cron Jobs | `**/*.cron.ts`    |
-| Bootstrap | `**/*.boot.ts`    |
+| Routes    | `**/*.ts` |
+| Queue     | `**/*.ts` |
+| Cron Jobs | `**/*.ts` |
+| Bootstrap | `**/*.ts` |
 
 > All plugins are optional and modular.
 
@@ -107,7 +107,3 @@ Zetten will automatically scan and load files based on folder + filename convent
 MIT © 2025 [Mayron Fernandes](https://github.com/mayron1806)
 
 ```
-
----
-
-Se quiser, posso também gerar badges (`npm`, `license`, `build passing`, etc), um `CHANGELOG.md` ou um gerador de projeto (`create-zett-app`). Me avisa o que quiser expandir!

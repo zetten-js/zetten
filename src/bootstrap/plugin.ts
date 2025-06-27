@@ -14,14 +14,20 @@ export class BootstrapPlugin implements Plugin {
 
   async init(): Promise<void> {
     await this.readFrom(this.baseDir, ...defaultPatterns);
-    this.files.forEach(async (file) => {
+    this.files.sort((a, b) => {
+      const orderA = a.module.options?.order ?? Infinity;
+      const orderB = b.module.options?.order ?? Infinity;
+      return orderA - orderB;
+    });
+
+    for (const file of this.files) {
       try {
         await file.module.fn();
         this.logger.info(`${file.name} loaded`);
       } catch (error) {
         this.logger.error(`Error loading ${file.name}: ${error}`);
       }
-    });
+    }
   }
 
   async readFrom(baseDir: string, ...pattern: string[]) {
