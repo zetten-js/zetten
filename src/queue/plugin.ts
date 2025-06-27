@@ -1,15 +1,14 @@
-
-import { LoadedFile, Loader } from '@zetten/core/loader';
-import { Logger } from '@zetten/core/logger';
-import { defaultExt } from '@zetten/core/mode';
+import { defaultExt, Logger } from '@/core';
+import { LoadedFile, Loader } from '@/core/loader';
 
 import { Queue, queueSchema } from './schema';
 
-export const defaultQueuePatterns = `**/*.queue.${defaultExt}`;
+export const defaultQueuePatterns = `**/*.${defaultExt}`;
 
 export abstract class QueuePlugin {
+  protected abstract logger: Logger;
   protected files: LoadedFile<Queue>[] = [];
-  constructor(protected baseDir: string, protected logger: Logger = console) { }
+  constructor(protected baseDir: string) { }
 
   abstract init(): void;
 

@@ -1,20 +1,18 @@
 import path from 'path';
 import { ZodError } from 'zod';
 
-import { Loader } from '@zetten/core/loader';
-import { Logger } from '@zetten/core/logger';
-import { defaultExt } from '@zetten/core/mode';
-import { Plugin } from '@zetten/core/plugin';
-import { Zetten } from '@zetten/core/server';
+import { defaultExt, Logger, Plugin, Zetten } from '@/core';
+import { Loader } from '@/core/loader';
 
 import { Handler, handlerSchema, Middleware, middlewareSchema } from './schema';
 
 const HTTP_METHODS = ["get", "post", "put", "delete", "patch"] as const;
-const defaultPatterns = HTTP_METHODS.map((method) => `**/${method}.handler.${defaultExt}`);
+const defaultPatterns = HTTP_METHODS.map((method) => `**/${method}.${defaultExt}`);
 
 export class HandlerPlugin implements Plugin {
+  private logger = new Logger(HandlerPlugin.name);
   private handlers: Array<Handler & { path: string, method: typeof HTTP_METHODS[number] }> = [];
-  constructor(private baseDir: string = "./routes", private logger: Logger = console) { }
+  constructor(private baseDir: string = "./routes") { }
   
   async init(zetten: Zetten): Promise<void> {
     await this.readFrom(this.baseDir, ...defaultPatterns);
@@ -22,6 +20,7 @@ export class HandlerPlugin implements Plugin {
     this.logger.info(`Found ${this.handlers.length} handlers`);
     const server = zetten.getServerAdapter();
     this.handlers.forEach(handler => {
+      this.logger.info(`Registering handler: ${handler.path}`);
       server.addRoute(handler.method, handler.path, handler.handler);
     })
   }
@@ -29,10 +28,9 @@ export class HandlerPlugin implements Plugin {
   private async findMiddlewares(routeDir: string, baseDir: string): Promise<Middleware[]> {
     const middlewares: Middleware[] = [];
     let currentDir = routeDir;
-
     while (currentDir.startsWith(baseDir)) {      
       try {
-        const files = await Loader.load<Middleware>(currentDir, middlewareSchema, `**/*.middleware.${defaultExt}`);
+        const files = await Loader.load<Middleware>(currentDir, middlewareSchema, `**/middleware.${defaultExt}`);
         files.forEach(file => {
           if (file.module.ignore) {
             this.logger.info(`Ignoring middleware: ${file.name}`);

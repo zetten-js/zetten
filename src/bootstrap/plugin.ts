@@ -1,20 +1,27 @@
 
-
-import { LoadedFile, Loader } from '@zetten/core/loader';
-import { Logger } from '@zetten/core/logger';
-import { defaultExt } from '@zetten/core/mode';
-import { Plugin } from '@zetten/core/plugin';
+import { defaultExt, Logger } from '@/core';
+import { LoadedFile, Loader } from '@/core/loader';
+import { Plugin } from '@/core/plugin';
 
 import { Bootstrap, bootstrapSchema } from './schema';
 
-const defaultPatterns = [`**/*.bootstrap.${defaultExt}`, `**/*.boot.${defaultExt}`, `**/*.bs.${defaultExt}`];
+const defaultPatterns = [`**/*.${defaultExt}`];
 
 export class BootstrapPlugin implements Plugin {
   private files: LoadedFile<Bootstrap>[] = [];
-  constructor(private baseDir: string = "./bootstrap", private logger: Logger = console) { }
+  private logger = new Logger(BootstrapPlugin.name);
+  constructor(private baseDir: string = "./bootstrap") { }
 
-  init(): void {
-    this.readFrom(this.baseDir, ...defaultPatterns);
+  async init(): Promise<void> {
+    await this.readFrom(this.baseDir, ...defaultPatterns);
+    this.files.forEach(async (file) => {
+      try {
+        await file.module.fn();
+        this.logger.info(`${file.name} loaded`);
+      } catch (error) {
+        this.logger.error(`Error loading ${file.name}: ${error}`);
+      }
+    });
   }
 
   async readFrom(baseDir: string, ...pattern: string[]) {

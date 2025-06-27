@@ -1,39 +1,46 @@
 {
   "name": "zetten",
-  "version": "0.0.1-alpha1",
+  "version": "0.0.1",
   "description": "A minimalist file-based full-stack framework for Node.js, inspired by Next.js App Router. Supports routes, queues, cron jobs and boot scripts by convention.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/index.js"
     },
     "./adapter/fastify": {
+      "types": "./dist/core/server/adapter/fastify/index.d.ts",
       "import": "./dist/core/server/adapter/fastify/index.js",
-      "types": "./dist/core/server/adapter/fastify/index.d.ts"
+      "require": "./dist/core/server/adapter/fastify/index.js"
     },
     "./adapter/bull": {
+      "types": "./dist/queue/adapter/bull/index.d.ts",
       "import": "./dist/queue/adapter/bull/index.js",
-      "types": "./dist/queue/adapter/bull/index.d.ts"
+      "require": "./dist/queue/adapter/bull/index.js"
     },
     "./cron": {
+      "types": "./dist/cron/index.d.ts",
       "import": "./dist/cron/index.js",
-      "types": "./dist/cron/index.d.ts"
+      "require": "./dist/cron/index.js"
     },
     "./bootstrap": {
+      "types": "./dist/bootstrap/index.d.ts",
       "import": "./dist/bootstrap/index.js",
-      "types": "./dist/bootstrap/index.d.ts"
+      "require": "./dist/bootstrap/index.js"
     }
-    
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.json",
+    "build": "tsup",
     "clean": "rm -rf dist",
-    "prepare": "npm run build"
+    "prebuild": "npm run clean",
+    "prepare": "npm run build",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
   },
   "keywords": [
     "framework",
@@ -58,6 +65,7 @@
   },
   "homepage": "https://github.com/zetten-js/zetten#readme",
   "dependencies": {
+    "chalk": "^5.4.1",
     "fast-glob": "^3.3.3",
     "node-cron": "^4.1.1",
     "zod": "^3.25.67"
@@ -77,7 +85,8 @@
   "devDependencies": {
     "@types/node": "^20.19.1",
     "bullmq": "^5.56.0",
-    "typescript": "^5.4.0",
-    "fastify": "^5.4.0"
+    "fastify": "^5.4.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.4.0"
   }
 }

@@ -50,7 +50,7 @@ zetten.start();
 
 ```ts
 import { FastifyRequest, FastifyReply } from 'fastify';
-import { HandlerOptions } from '@zetten/handler';
+import { HandlerOptions } from '@/handler';
 
 export async function handler(_: FastifyRequest, reply: FastifyReply) {
   reply.send({ hello: 'zetten' });

@@ -1,6 +1,6 @@
 import fastify, { FastifyInstance } from 'fastify';
 
-import { HandlerPlugin } from '@zetten/handler';
+import { HandlerPlugin } from '@/handler';
 
 import { IServerAdapter } from '../../types';
 

@@ -2,6 +2,9 @@ import fastGlob from 'fast-glob';
 import path from 'path';
 import { z } from 'zod';
 
+import { Logger } from '../logger';
+import { defaultFolder } from '../mode';
+
 export interface LoadedFile<T> {
   path: string;
   name: string;
@@ -11,8 +14,8 @@ export interface LoadedFile<T> {
 export interface LoadedFileWithSkip<T> extends LoadedFile<T> {
   skip?: boolean;
 }
-
 export class Loader {
+  private static logger = new Logger(Loader.name);
   static async load<T>(
     baseDir: string,
     schema: z.ZodType<T>,
@@ -22,10 +25,9 @@ export class Loader {
       patterns = ['**/*.js', '**/*.ts'];
     }
     const files = await fastGlob(patterns, {
-      cwd: path.resolve(process.cwd(), baseDir),
+      cwd: path.resolve(process.cwd(), defaultFolder, baseDir),
       absolute: true,
-    });
-    
+    });    
     const results = await Promise.all(
       files.map(async (filePath): Promise<LoadedFileWithSkip<T>> => {
         const parsed = path.parse(filePath);
@@ -39,7 +41,7 @@ export class Loader {
             skip: false
           };
         } catch (error) {
-          console.error(`Error importing file ${filePath}:`, error);
+          Loader.logger.error(`Error importing file ${filePath}: ${error}`);
           return {
             module: {} as T,
             path: filePath,

@@ -1,24 +1,24 @@
 import cron from 'node-cron';
 
-import { LoadedFile, Loader } from '../core/loader';
-import { Logger } from '../core/logger';
-import { defaultExt } from '../core/mode';
-import { Plugin } from '../core/plugin';
+import { defaultExt, LoadedFile, Loader, Logger, Plugin } from '@/core';
+
 import { CronJob, cronJobSchema } from './schema';
 
-export const defaultCronPatterns = `**/*.cron.${defaultExt}`;
+export const defaultCronPatterns = `**/*.${defaultExt}`;
 
-export abstract class BaseCronPlugin implements Plugin {
+export class CronPlugin implements Plugin {
   protected files: LoadedFile<CronJob>[] = [];
-  constructor(protected baseDir: string = "./cron", private logger: Logger = console) { }
+  private logger = new Logger(CronPlugin.name);
+  constructor(protected baseDir: string = "./cron") { }
 
   async init(): Promise<void> {
     await this.readFrom(this.baseDir, defaultCronPatterns);
     this.files.forEach(file => {
+      this.logger.info(`Registered cron job: ${file.name}`);
       cron.schedule(
         file.module.options.schedule,
         file.module.job,
-        { 
+        {
           timezone: file.module.options.timezone,
           maxExecutions: file.module.options.maxExecutions,
           maxRandomDelay: file.module.options.maxRandomDelay,
@@ -26,7 +26,7 @@ export abstract class BaseCronPlugin implements Plugin {
           name: file.module.options.name
         },
       );
-    })
+    });
   }
 
   async readFrom(baseDir: string, ...pattern: string[]) {

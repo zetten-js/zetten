@@ -1,18 +1,19 @@
 import { Queue as BullQueue, QueueEvents, QueueOptions as BullQueueOptions, Worker } from 'bullmq';
 
-import { Logger } from '@zetten/core/logger';
-import { defaultQueuePatterns, QueuePlugin } from '@zetten/queue/plugin';
+import { Logger } from '@/core';
+import { defaultQueuePatterns, QueuePlugin } from '@/queue/plugin';
 
 export class BullMQPlugin extends QueuePlugin {
+  override logger = new Logger(BullMQPlugin.name);
+  
   private queues: Map<string, BullQueue> = new Map();
   private workers: Map<string, Worker> = new Map();
   private events: Map<string, QueueEvents> = new Map();
-
+  
   constructor(
     baseDir: string = "./queue",
-    private patterns: string[] = [defaultQueuePatterns],
-    logger: Logger = console
-  ) { super(baseDir, logger); }
+    private patterns: string[] = [defaultQueuePatterns]
+  ) { super(baseDir); }
 
   async init(): Promise<void> {
     await this.readFrom(this.baseDir, ...this.patterns);
@@ -33,7 +34,7 @@ export class BullMQPlugin extends QueuePlugin {
       }, {
         connection: { url: q.options.redis },
         concurrency: q.workerOptions.concurrency,
-        limiter: q.workerOptions.limiter,
+        // limiter: q.workerOptions.limiter ??,
         metrics: q.workerOptions.metrics,
         drainDelay: q.workerOptions.settings?.drainDelay,
         lockDuration: q.workerOptions.settings?.lockDuration,

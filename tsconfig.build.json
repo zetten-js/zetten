@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es2020",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "incremental": true,
+    "noImplicitAny": false,
+    "moduleResolution": "node",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "emitDeclarationOnly": false,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["./src/*"],
+    },
+    "plugins": [
+      { "transform": "typescript-transform-paths", "useRootDirs": true },
+      { "transform": "typescript-transform-paths", "useRootDirs": true, "afterDeclarations": true },
+    ]
+  },
+  "exclude": ["node_modules", "dist", "coverage"],
+  "include": ["src"]
+}

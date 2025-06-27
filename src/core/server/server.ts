@@ -1,4 +1,5 @@
-import { HandlerPlugin } from '@zetten/handler';
+
+import { HandlerPlugin } from '@/handler';
 
 import { Logger } from '../logger';
 import { Plugin } from '../plugin';
@@ -7,12 +8,11 @@ import { IServerAdapter, ServerConfig } from './types';
 export class Zetten {
   private plugins: Plugin[] = [];
   private serverAdapter: IServerAdapter;
-  private logger: Logger;
+  private logger: Logger = new Logger(Zetten.name);
 
   constructor(private config: ServerConfig) {
     this.serverAdapter = config.adapter;
-    this.logger = config.logger || console;
-    this.plugins.push(new HandlerPlugin(config.routesDir, this.logger));
+    this.plugins.push(new HandlerPlugin(config.routesDir));
   }
 
   public registerPlugin(plugin: Plugin): this {
