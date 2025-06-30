@@ -105,9 +105,3 @@ Zetten will automatically scan and load files based on folder + filename convent
 ## 📄 License
 
 MIT © 2025 [Mayron Fernandes](https://github.com/mayron1806)
-
-```
-
----
-
-Se quiser, posso também gerar badges (`npm`, `license`, `build passing`, etc), um `CHANGELOG.md` ou um gerador de projeto (`create-zett-app`). Me avisa o que quiser expandir!
