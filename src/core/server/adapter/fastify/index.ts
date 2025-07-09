@@ -1,12 +1,8 @@
-import fastify, { FastifyInstance } from 'fastify';
+import fastify, { FastifyInstance } from "fastify";
 
-import { HandlerPlugin } from '@/handler';
-
-import { IServerAdapter } from '../../types';
+import { IServerAdapter } from "../../types";
 
 export class FastifyAdapter implements IServerAdapter {
-  handler?: HandlerPlugin;
-
   constructor(private instance: FastifyInstance = fastify()) {}
 
   async listen(port: number): Promise<void> {

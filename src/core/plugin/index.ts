@@ -1,5 +1,3 @@
-import { Zetten } from '../server';
+import { Zetten } from "../server";
 
-export interface Plugin {
-  init(zetten: Zetten): void | Promise<void>;
-}
+export type Plugin<T, U> = (zetten: Zetten<T>) => U | void | Promise<U | void>;

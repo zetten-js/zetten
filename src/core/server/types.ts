@@ -1,6 +1,6 @@
 
 
-import { Logger } from '../logger';
+import { Logger } from "../logger";
 
 export interface IServerAdapter {
   listen(port: number): void | Promise<void>;
