@@ -39,28 +39,14 @@ async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middl
 }
 
 function segmentToRoute(seg: string): string {
-  if (seg.startsWith("[...") && seg.endsWith("]")) return "*";
   if (seg.startsWith("[") && seg.endsWith("]")) return `:${seg.slice(1, -1)}`;
   return seg;
 }
 
-// function buildRouteFromPath(fullPath: string, baseDir: string): string {
-//   const normalizedFullPath = path.normalize(fullPath);
-//   const normalizedBaseDir = path.normalize(baseDir);
-//   console.log(normalizedBaseDir, normalizedFullPath);
-
-//   const relative = path.relative(baseDir, fullPath);
-//   const segments = relative.split(path.sep).slice(0, -1);
-//   const routeSegments = segments.map(segmentToRoute);
-//   return "/" + routeSegments.filter(Boolean).join("/");
-// }
-
 function buildRouteFromPath(fullPath: string, baseDir: string): string {
-  // Normaliza e divide os caminhos em partes
   const fullParts = path.normalize(fullPath).split(/[\\/]/);
   const baseParts = path.normalize(baseDir).split(/[\\/]/);
 
-  // Encontra onde o baseDir começa no fullPath
   let startIndex = -1;
   for (let i = 0; i < fullParts.length; i++) {
     if (fullParts.slice(i, i + baseParts.length).join('/') === baseParts.join('/')) {
@@ -73,17 +59,14 @@ function buildRouteFromPath(fullPath: string, baseDir: string): string {
     throw new Error(`Base directory "${baseDir}" not found in path "${fullPath}"`);
   }
 
-  // Pega as partes após o baseDir
   const differenceParts = fullParts.slice(startIndex + baseParts.length);
 
-  // Remove a extensão do arquivo final
-  const lastPart = differenceParts.pop()?.replace(/\.[^/.]+$/, '') || '';
-  const routeParts = [...differenceParts, lastPart];
+  const routeParts = [...differenceParts];
 
-  // Processa cada segmento e monta a rota
-  const routeSegments = routeParts.map(segmentToRoute).map(segment => segment.split(path.sep).slice(0, -1));
+  const routeSegments = routeParts.map(segmentToRoute);
   return '/' + routeSegments.filter(Boolean).join('/');
 }
+
 async function readFrom(baseDir: string, ...pattern: string[]) {
   const handlers: Array<Handler & { path: string, method: typeof HTTP_METHODS[number] }> = [];
 
