@@ -1,4 +1,4 @@
-import chalk from 'chalk';
+import chalk from "chalk";
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
@@ -14,7 +14,7 @@ export class Logger {
     return `${date} ${time}`;
   }
 
-  private formatMessage(level: LogLevel, message: string) {
+  private formatMessage(level: LogLevel, ...message: unknown[]) {
     const timestamp = this.getTimestamp();
     const upperLevel = level.toUpperCase();
     const tag = `[${timestamp}] [${this.prefix}] [${upperLevel}]`;
@@ -33,19 +33,19 @@ export class Logger {
     }
   }
 
-  info(message: string) {
-    console.log(this.formatMessage('info', message));
+  info(...message: unknown[]) {
+    console.log(this.formatMessage('info', ...message));
   }
 
-  warn(message: string) {
-    console.warn(this.formatMessage('warn', message));
+  warn(...message: unknown[]) {
+    console.warn(this.formatMessage('warn', ...message));
   }
 
-  error(message: string) {
-    console.error(this.formatMessage('error', message));
+  error(...message: unknown[]) {
+    console.error(this.formatMessage('error', ...message));
   }
 
-  debug(message: string) {
-    console.debug(this.formatMessage('debug', message));
+  debug(...message: unknown[]) {
+    console.debug(this.formatMessage('debug', ...message));
   }
 }

@@ -1,17 +1,24 @@
-import z from 'zod';
+import z from "zod";
 
-export const middlewareFn = z.union([
-  z.function(),
-  z.array(z.function())
-]).optional();
-
+export const middlewareOptions = z.object({
+  ignore: z.boolean().default(false).optional(),
+  name: z.string()
+})
 export const middlewareSchema = z.object({
-  middleware: middlewareFn,
-  ignore: z.boolean().default(false).optional()
+  middleware: z.function().returns(z.any()),
+  options: middlewareOptions
 });
-export type Middleware = z.infer<typeof middlewareSchema>;
+
+export const middlewareModuleSchema = z.object({
+  middleware: z.union([
+    middlewareSchema,
+    middlewareSchema.array()
+  ])
+});
+export type MiddlewareModule = z.infer<typeof middlewareModuleSchema>;
 
 export const handlerOptionsSchema = z.object({
+  ignore: z.boolean().default(false).optional(),
   schema: z.object({
     body: z.any().optional(),
     query: z.any().optional(),
@@ -34,8 +41,7 @@ export type HandlerOptions = z.infer<typeof handlerOptionsSchema>;
 export const handlerSchema = z.object({
   handler: z.function(),
   options: handlerOptionsSchema,
-  middlewares: middlewareFn.optional(),
-  ignore: z.boolean().default(false).optional(),
+  middlewares: middlewareSchema.optional(),
 })
 
 export type Handler = z.infer<typeof handlerSchema>;

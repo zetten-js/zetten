@@ -1,27 +1,35 @@
-import { defaultExt, Logger, Plugin, Zetten } from "@/core";
+import { defaultExt, Logger, Plugin, ZContext, Zetten } from "@/core";
 import { Loader } from "@/core/loader";
+import { toArray } from "@/utils";
 import path from "path";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 
-import { Handler, handlerSchema, Middleware, middlewareSchema } from "./schema";
+import { Handler, handlerSchema, MiddlewareModule, middlewareModuleSchema, middlewareSchema } from "./schema";
+import { EndpointHandler, HTTP_METHODS, Middleware } from "./types";
 
-const HTTP_METHODS = ["get", "post", "put", "delete", "patch"] as const;
 const defaultPatterns = HTTP_METHODS.map((method) => `**/${method}.${defaultExt}`);
 
 const logger = new Logger("HANDLER PLUGIN");
 
-async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middleware[]> {
-  const middlewares: Middleware[] = [];
-  let currentDir = routeDir;
-  while (currentDir.startsWith(baseDir)) {
+async function findMiddlewares(baseDir: string, routePath: string): Promise<z.infer<typeof middlewareSchema>[]> {
+  const middlewares: z.infer<typeof middlewareSchema>[] = [];
+
+  const splittedPath = routePath.split("/");
+  for (let i = 0; i < splittedPath.length; i++) {
+    let currentDir = path.join(baseDir, ...splittedPath.filter((_, index) => index < i))
+
     try {
-      const files = await Loader.load<Middleware>(currentDir, middlewareSchema, `**/middleware.${defaultExt}`);
+      const files = await Loader.load<MiddlewareModule>(currentDir, middlewareModuleSchema, `middleware.${defaultExt}`);
+
       files.forEach(file => {
-        if (file.module.ignore) {
-          logger.info(`Ignoring middleware: ${file.name}`);
-          return;
+        const middlewaresList = toArray(file.module.middleware);
+        for (const middleware of middlewaresList) {
+          if (middleware.options.ignore) {
+            logger.info(`Ignoring middleware: ${file.name}`);
+            continue;
+          }
+          middlewares.push(middleware);
         }
-        middlewares.push(file.module);
       });
     } catch (error) {
       if (error instanceof ZodError) {
@@ -30,10 +38,6 @@ async function findMiddlewares(routeDir: string, baseDir: string): Promise<Middl
         logger.error(`Invalid middleware on ${currentDir}: ${error}`);
       }
     }
-
-    const parentDir = path.dirname(currentDir);
-    if (parentDir === currentDir) break;
-    currentDir = parentDir;
   }
   return middlewares;
 }
@@ -68,51 +72,77 @@ function buildRouteFromPath(fullPath: string, baseDir: string): string {
 }
 
 async function readFrom(baseDir: string, ...pattern: string[]) {
-  const handlers: Array<Handler & { path: string, method: typeof HTTP_METHODS[number] }> = [];
+  const handlers: Array<{
+    path: string,
+    method: typeof HTTP_METHODS[number],
+    handler: EndpointHandler,
+    middlewares: Middleware[]
+  }> = [];
 
   if (!pattern.length) pattern = defaultPatterns;
 
   const files = await Loader.load<Handler>(baseDir, handlerSchema, ...pattern);
-  logger.info(baseDir);
-  files.forEach(async (file) => {
+  await Promise.all(files.map(async (file) => {
     const routePath = buildRouteFromPath(file.path, baseDir);
-    if (file.module.ignore) {
+    if (file.module.options.ignore) {
       logger.info(`Ignoring handler: ${routePath}`);
       return;
     }
 
-    const pathMiddlewares = await findMiddlewares(file.path, baseDir);
+    const middlewares = await findMiddlewares(baseDir, routePath);
 
-    const pathMiddlewareFns = pathMiddlewares.flatMap(m =>
-      Array.isArray(m.middleware) ? m.middleware : [m.middleware]
-    );
-    let allMiddlewares = [...pathMiddlewareFns];
     if (file.module.middlewares) {
-      const handlerMiddlewares = Array.isArray(file.module.middlewares)  ? file.module.middlewares : [file.module.middlewares];
+      const handlerMiddlewares = toArray(file.module.middlewares);
 
-      allMiddlewares.push(...handlerMiddlewares);
+      middlewares.push(...handlerMiddlewares);
     }
-    const filteredMiddlewares = allMiddlewares.filter(m => m !== undefined);
+    const filteredMiddlewares = middlewares.filter(Boolean);
     handlers.push({
       ...file.module,
       method: file.name.split('.')[0] as typeof HTTP_METHODS[number],
       path: routePath,
-      middlewares: filteredMiddlewares.length > 0 ? filteredMiddlewares : undefined,
+      middlewares: filteredMiddlewares,
     });
-  });
+  }));
   return handlers;
 }
 
-export const handlerPlugin = (baseDir: string): Plugin<{}, Promise<void>> => {
-  return async (zetten: Zetten): Promise<void> => {
+const formatPath = (path: string) => {
+  const splittedPath = path.split('/');
+  splittedPath.pop();
+  const formattedPath = splittedPath.join('/');
+  return formattedPath.length > 0 ? formattedPath : '/';
+}
+
+const printHandler = (
+  handler: {
+    path: string,
+    method: typeof HTTP_METHODS[number],
+    handler: EndpointHandler,
+    middlewares: Middleware[]
+  }
+) => {
+  const method = handler.method.toUpperCase()
+  const path = formatPath(handler.path);
+  const middlewares = handler.middlewares.length > 0 ?
+    `(${handler.middlewares.map(m => m.options.name).join(" > ")}) ` : ""
+  logger.info(`Registering handler: [${method}] ${middlewares}${path}`);
+}
+
+export const handlerPlugin = (baseDir: string): Plugin<ZContext, Promise<void>> => {
+  return async (zetten: Zetten<ZContext>): Promise<void> => {
     const handlers = await readFrom(baseDir, ...defaultPatterns);
 
     logger.info(`Found ${handlers.length} handlers`);
-    const server = zetten.getServerAdapter();
+    const server = zetten.getRouter();
     handlers.forEach(handler => {
-      logger.info(`Registering handler: ${handler.path}`);
-
-      server.addRoute(handler.method, handler.path, handler.handler);
+      printHandler(handler);
+      server.addRoute({
+        method: handler.method,
+        path: formatPath(handler.path),
+        handler: handler.handler,
+        middlewares: handler.middlewares.map(({ middleware }) => middleware)
+      });
     })
   }
 }

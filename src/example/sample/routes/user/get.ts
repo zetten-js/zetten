@@ -1,7 +1,10 @@
 import { HandlerOptions } from "@/handler";
+import { ZRouterContext } from "@/handler/types";
 
-export const handler = async (req: any, res: any) => {
-  res.send("get User!");
+import { users } from "../../db";
+
+export const handler = async ({ response }: ZRouterContext) => {
+  response.json(users);
 };
 
 export const options: HandlerOptions = {
